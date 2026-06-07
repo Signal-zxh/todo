@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 )
 
@@ -15,6 +16,15 @@ var nextID = 1
 
 func listHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: 渲染模板，显示所有任务
+	tmpl, err := template.ParseFiles("templates/list.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, todos)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func addHandler(w http.ResponseWriter, r *http.Request) {
