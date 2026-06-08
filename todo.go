@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -53,11 +54,26 @@ func addHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func doneHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: 标记任务完成
+	// 标记任务完成
+	// 从URL提取ID
+	idStr := strings.TrimPrefix(r.URL.Path, "/done/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	for i := range todos {
+		if todos[i].ID == id {
+			todos[i].Done = true
+			break
+		}
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 func main() {
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/add", addHandler)
-	http.HandleFunc("/done", doneHandler)
+	http.HandleFunc("/done/", doneHandler)
 	http.ListenAndServe(":8080", nil)
 }
