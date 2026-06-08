@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"strings"
 )
 
 type Todo struct {
@@ -15,7 +16,7 @@ var todos = []Todo{}
 var nextID = 1
 
 func listHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: 渲染模板，显示所有任务
+	// 渲染模板，显示所有任务
 	tmpl, err := template.ParseFiles("templates/list.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -28,7 +29,27 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func addHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: 解析表单，添加任务
+	//  解析表单，添加任务
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	task := r.FormValue("task")
+	if strings.TrimSpace(task) == "" {
+		http.Error(w, "Task cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	newTodo := Todo{
+		ID:   nextID,
+		Task: task,
+		Done: false,
+	}
+	todos = append(todos, newTodo)
+	nextID++
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func doneHandler(w http.ResponseWriter, r *http.Request) {
