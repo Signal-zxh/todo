@@ -79,11 +79,35 @@ func doneHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//在 doneHandler 里，修改任务后调用 saveTodos(todos)
-	err = saveTodos(todos)
-	if err != nil {
+	if err = saveTodos(todos); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	// 提取ID
+	idStr := strings.TrimPrefix(r.URL.Path, "/delete/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	// 查找并删除
+	for i, todo := range todos {
+		if todo.ID == id {
+			todos = append(todos[:i], todos[i+1:]...)
+			break
+		}
+	}
+	// 保存到文件
+	if err := saveTodos(todos); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// 重定向回首页
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -134,5 +158,6 @@ func main() {
 	http.HandleFunc("/", listHandler)
 	http.HandleFunc("/add", addHandler)
 	http.HandleFunc("/done/", doneHandler)
+	http.HandleFunc("/delete/", deleteHandler)
 	http.ListenAndServe(":8080", nil)
 }

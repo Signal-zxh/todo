@@ -13,6 +13,7 @@
             {{if not .Done}}
                 <a href="/done/{{.ID}}">完成</a>
             {{end}}
+                <a href="/delete/{{.ID}}" style="color: red; margin-left: 10px;">删除</a>
         </li>
     {{end}}
 </ul>
