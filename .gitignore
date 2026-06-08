@@ -4,6 +4,7 @@ todo.exe
 
 # 数据文件（本地生成，不提交）
 *.json
+data/
 
 # IDE 配置
 .idea/
